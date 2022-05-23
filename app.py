@@ -79,15 +79,15 @@ def tob():
 ### - Variable Flask Route, Start - ###
 @app.route("/api/v1.0/<start>")
 def start_date(start):
+    start_dt = datetime.strptime(start, "%Y-%m-%d")
     session = Session(engine)
-    date = func.date(Measurement.date)
+    
     tmin = func.min(Measurement.tobs)
     tavg = func.avg(Measurement.tobs)
     tmax = func.max(Measurement.tobs)
     
-    
     query = session.query(tmin, tavg, tmax).\
-        filter(date >= start).all()
+        filter(Measurement.date > start_dt).all()
     session.close()
     
     temps = []
