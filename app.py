@@ -79,19 +79,22 @@ def tob():
 ### - Variable Flask Route, Start - ###
 @app.route("/api/v1.0/<start>")
 def start_date(start):
-    start_dt = datetime.strptime(start, "%Y-%m-%d")
+    # start_dt = datetime.strptime(start, "%Y-%m-%d")
     session = Session(engine)
+    
+    start_date = start
+    end_date = recent_date
     
     tmin = func.min(Measurement.tobs)
     tavg = func.avg(Measurement.tobs)
     tmax = func.max(Measurement.tobs)
     
-    query = session.query(tmin, tavg, tmax).\
-        filter(Measurement.date > start_dt).all()
+    temp_query = session.query(tmin, tavg, tmax).\
+        filter(Measurement.date.between(start_date, end_date)).all()
     session.close()
     
     temps = []
-    for min,avg,max in query:
+    for min,avg,max in temp_query:
         temp_dict = {}
         temp_dict["Min"] = min
         temp_dict["Avg"] = avg
@@ -100,29 +103,29 @@ def start_date(start):
     
     return jsonify(temps)
 
-# ### - Variable Flask Route, Start/End - ###
-# @app.route("/api/v1.0/<start>/<end>")
-# def start_end(start, end):
-#     session = Session(engine)
+### - Variable Flask Route, Start/End - ###
+@app.route("/api/v1.0/<start>/<end>")
+def start_end(start, end):
+    session = Session(engine)
     
-#     tmin = func.min(Measurement.tobs)
-#     tavg = func.avg(Measurement.tobs)
-#     tmax = func.max(Measurement.tobs)
+    tmin = func.min(Measurement.tobs)
+    tavg = func.avg(Measurement.tobs)
+    tmax = func.max(Measurement.tobs)
     
-#     query = session.query(tmin, tavg, tmax).\
-#         filter(Measurement.date >= start).\
-#         filter(Measurement.date <= end).all()
-#     session.close()
+    query = session.query(tmin, tavg, tmax).\
+        filter(Measurement.date >= start).\
+        filter(Measurement.date <= end).all()
+    session.close()
     
-#     temps = []
-#     for min,avg,max in query:
-#         temp_dict = {}
-#         temp_dict["Min"] = min
-#         temp_dict["Avg"] = avg
-#         temp_dict["Max"] = max
-#         temps.append(temp_dict)
+    temps2 = []
+    for min,avg,max in query:
+        temp_dict = {}
+        temp_dict["Min"] = min
+        temp_dict["Avg"] = avg
+        temp_dict["Max"] = max
+        temps2.append(temp_dict)
     
-#     return jsonify(temps)
+    return jsonify(temps2)
 
 
 if __name__ == '__main__':
